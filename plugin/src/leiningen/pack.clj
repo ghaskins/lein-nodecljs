@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.tools.file-utils :as fileutils]
             [cheshire.core :as json]
-            [cljs.build.api :as build]))
+            [cljs.build.api :as build]
+            [clojure.java.shell :refer [sh]]))
 
 (defn- emit-packagejson [{:keys [name description version url npm]} workdir]
   (let [path (io/file workdir "package.json")
@@ -45,5 +46,6 @@
                         :optimizations :none
                         :target :nodejs
                         :pretty-print true})
+
     ;; And then package it up
-    ))
+    (sh "npm" "pack" (.getCanonicalPath workdir))))
