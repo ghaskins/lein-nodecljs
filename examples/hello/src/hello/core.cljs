@@ -1,7 +1,9 @@
 (ns hello.core
-  (:gen-class))
+  (:require [cljs.nodejs :as nodejs]))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
+(nodejs/enable-util-print!)
+
+(defn -main [& args]
+  (println "Hello world!"))
+
+(set! *main-cli-fn* -main)
