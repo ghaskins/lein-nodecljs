@@ -15,14 +15,16 @@
     (println "[npm] Installing")
     (npm "install" "-g" (.getCanonicalPath workdir))))
 
+(defn- nodecompile [dir]
+  (println "[npm] Compiling")
+  (npm "install" :dir (.getCanonicalPath dir)))
+
 (defn- compile-hook
   "Overrides the 'compile' task to compile our nodejs application locally"
   [f project & args]
 
   (let [workdir (core/compile project)]
-
-    (println "[npm] Compiling")
-    (npm "install" :dir (.getCanonicalPath workdir))))
+    (nodecompile workdir)))
 
 (defn- run-hook
   "Overrides the 'run' task to execute our program on nodejs platform"
@@ -30,8 +32,7 @@
 
   (let [workdir (core/compile project)]
 
-    (println "[npm] Compiling")
-    (npm "install" :dir (.getCanonicalPath workdir))
+    (nodecompile workdir)
 
     (println "[node] Launching")
     (node "main.js" :dir (.getCanonicalPath workdir))))
