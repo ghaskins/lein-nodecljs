@@ -1,6 +1,7 @@
 (ns lein-nodecljs.core
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
+            [clojure.string :as string]
             [cljs.build.api :as build])
   (:refer-clojure :exclude [compile]))
 
@@ -42,6 +43,11 @@
                         :optimizations :none
                         :target :nodejs
                         :pretty-print true})
+
+    ;; Fix up the emitted code to address CLJS-1990 (http://dev.clojure.org/jira/browse/CLJS-1990)
+    (let [patch (-> (slurp mainjs)
+                    (string/replace "path.resolve(\".\")", "__dirname"))]
+      (spit mainjs patch))
 
     ;; Finally, return our working dir
     workdir))
