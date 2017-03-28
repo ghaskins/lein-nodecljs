@@ -1,4 +1,4 @@
-(ns nodecljs.core
+(ns lein-nodecljs.core
   (:require [clojure.java.io :as io]
             [clojure.tools.file-utils :as fileutils]
             [cheshire.core :as json]

@@ -1,5 +1,5 @@
 (ns leiningen.pack
-  (:require [nodecljs.core :as core]
+  (:require [lein-nodecljs.core :as core]
             [clojure.java.shell :refer [sh]]))
 
 (defn pack
