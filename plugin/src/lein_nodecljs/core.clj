@@ -22,7 +22,7 @@
     ;; and blast it out to the filesystem
     (spit path content :truncate true)))
 
-(defn compile [{:keys [target-path main] :as project}]
+(defn compile [{:keys [source-paths target-path main] :as project}]
 
   (let [target (io/file target-path)
         workdir (io/file target "nodecljs")
@@ -35,14 +35,16 @@
     (emit-packagejson project workdir)
 
     ;; Emit the javascript code
-    (build/build "src" {:main main
-                        :output-to (.getCanonicalPath mainjs)
-                        :output-dir (.getCanonicalPath outputdir)
-                        :asset-path "src"
-                        :source-map true
-                        :optimizations :none
-                        :target :nodejs
-                        :pretty-print true})
+    (build/build
+     (apply build/inputs source-paths)
+     {:main main
+      :output-to (.getCanonicalPath mainjs)
+      :output-dir (.getCanonicalPath outputdir)
+      :asset-path "src"
+      :source-map true
+      :optimizations :none
+      :target :nodejs
+      :pretty-print true})
 
     ;; Fix up the emitted code to address CLJS-1990 (http://dev.clojure.org/jira/browse/CLJS-1990)
     (let [patch (-> (slurp mainjs)
