@@ -9,7 +9,7 @@
   (let [workdir (core/compile project)]
 
     (println "[npm] Packaging source")
-    (let [retval (sh "npm" "pack" "--verbose" (.getCanonicalPath workdir))]
+    (let [retval (sh "npm" "pack" "--verbose" :dir (.getCanonicalPath workdir))]
 
       (println (:err retval))
 
