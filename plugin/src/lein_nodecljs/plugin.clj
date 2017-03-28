@@ -1,5 +1,6 @@
 (ns lein-nodecljs.plugin
   (:require [lein-nodecljs.core :as core]
+            [lein-nodecljs.npm :refer :all]
             [robert.hooke]
             [leiningen.install]
             [leiningen.compile]
@@ -12,12 +13,7 @@
   (let [workdir (core/compile project)]
 
     (println "[npm] Installing")
-    (let [retval (sh "npm" "install" "-g" (.getCanonicalPath workdir))]
-
-      (println (:err retval))
-
-      (when (-> retval :exit zero?)
-        (println (:out retval))))))
+    (npm "install" "-g" (.getCanonicalPath workdir))))
 
 (defn- compile-hook
   "Overrides the 'compile' task to compile our nodejs application locally"
@@ -26,12 +22,7 @@
   (let [workdir (core/compile project)]
 
     (println "[npm] Compiling")
-    (let [retval (sh "npm" "install" :dir (.getCanonicalPath workdir))]
-
-      (println (:err retval))
-
-      (when (-> retval :exit zero?)
-        (println (:out retval))))))
+    (npm "install" :dir (.getCanonicalPath workdir))))
 
 (defn hooks []
   (robert.hooke/add-hook #'leiningen.install/install install-hook)

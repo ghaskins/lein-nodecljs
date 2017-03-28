@@ -1,5 +1,6 @@
 (ns leiningen.pack
   (:require [lein-nodecljs.core :as core]
+            [lein-nodecljs.npm :refer :all]
             [clojure.java.shell :refer [sh]]))
 
 (defn pack
@@ -9,9 +10,4 @@
   (let [workdir (core/compile project)]
 
     (println "[npm] Packaging source")
-    (let [retval (sh "npm" "pack" "--verbose" :dir (.getCanonicalPath workdir))]
-
-      (println (:err retval))
-
-      (when (-> retval :exit zero?)
-        (println "Wrote" (:out retval))))))
+    (npm "pack" "--verbose" :dir (.getCanonicalPath workdir))))
