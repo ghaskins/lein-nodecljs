@@ -3,8 +3,7 @@
             [lein-nodecljs.npm :refer :all]
             [robert.hooke]
             [leiningen.install]
-            [leiningen.compile]
-            [clojure.java.shell :refer [sh]]))
+            [leiningen.compile]))
 
 (defn- install-hook
   "Overrides the 'install' task with an 'npm install -g' action"
