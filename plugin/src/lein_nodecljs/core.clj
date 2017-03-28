@@ -4,7 +4,7 @@
             [cljs.build.api :as build])
   (:refer-clojure :exclude [compile]))
 
-(defn- emit-packagejson [{:keys [name description version url npm]} workdir]
+(defn- emit-packagejson [{:keys [name description version url npm bin]} workdir]
   (let [path (io/file workdir "package.json")
         content (json/generate-string {:name name
                                        :description description
@@ -13,7 +13,7 @@
                                        :dependencies (->> npm
                                                           :dependencies
                                                           (into (sorted-map)))
-                                       :bin {name "./main.js"}}
+                                       :bin {(if bin bin name) "./main.js"}}
                                       {:pretty true})]
     ;; ensure the path exists
     (io/make-parents path)
