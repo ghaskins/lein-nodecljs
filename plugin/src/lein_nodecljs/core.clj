@@ -1,6 +1,5 @@
 (ns lein-nodecljs.core
   (:require [clojure.java.io :as io]
-            [clojure.tools.file-utils :as fileutils]
             [cheshire.core :as json]
             [cljs.build.api :as build])
   (:refer-clojure :exclude [compile]))
@@ -30,9 +29,6 @@
         mainjs (io/file workdir "main.js")]
 
     (println "[cljs] Compiling")
-
-    ;; Blow away our working dir to ensure we build fresh
-    (fileutils/recursive-delete workdir)
 
     ;; Emit the package.json file
     (emit-packagejson project workdir)
