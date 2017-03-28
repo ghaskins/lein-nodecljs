@@ -1,6 +1,6 @@
 (ns lein-nodecljs.plugin
   (:require [lein-nodecljs.core :as core]
-            [lein-nodecljs.npm :refer :all]
+            [lein-nodecljs.exec :refer :all]
             [robert.hooke]
             [leiningen.install]
             [leiningen.compile]))

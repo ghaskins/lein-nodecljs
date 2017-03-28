@@ -1,4 +1,4 @@
-(ns lein-nodecljs.npm
+(ns lein-nodecljs.exec
   (:require [clojure.java.shell :refer [sh]]))
 
 (defn npm [& args]

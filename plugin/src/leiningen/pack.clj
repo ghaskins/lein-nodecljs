@@ -1,6 +1,6 @@
 (ns leiningen.pack
   (:require [lein-nodecljs.core :as core]
-            [lein-nodecljs.npm :refer :all]))
+            [lein-nodecljs.exec :refer :all]))
 
 (defn pack
   "Packages a nodecljs project with 'npm pack', suitable for installation or deployment to npmjs.org"
