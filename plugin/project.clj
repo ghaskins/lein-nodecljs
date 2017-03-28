@@ -5,6 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :lein-release {:deploy-via :clojars}
   :dependencies [[cheshire "5.7.0"]
-                 [clojure-tools "1.1.3"]]
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "1.9.494"]]}}
+                 [clojure-tools "1.1.3"]
+                 [org.clojure/clojurescript "1.9.495"
+                  :exclusions [org.apache.ant/ant]]]
   :eval-in-leiningen true)
