@@ -1,5 +1,5 @@
 (defproject lein-nodecljs "0.1.0-SNAPSHOT"
-  :description "A plugin for Leningen to assist with building Clojurescript apps for NodeJS"
+  :description "A plugin for Leiningen to assist with building Clojurescript apps for NodeJS"
   :url "http://github.com/ghaskins/lein-nodecljs"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
