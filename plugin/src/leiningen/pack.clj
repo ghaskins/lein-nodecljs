@@ -7,5 +7,11 @@
   [project & args]
 
   (let [workdir (core/compile project)]
-    ;; And then package it up
-    (sh "npm" "pack" (.getCanonicalPath workdir))))
+
+    (println "[npm] Packaging source")
+    (let [retval (sh "npm" "pack" "--verbose" (.getCanonicalPath workdir))]
+
+      (println (:err retval))
+
+      (when (-> retval :exit zero?)
+        (println "Wrote" (:out retval))))))

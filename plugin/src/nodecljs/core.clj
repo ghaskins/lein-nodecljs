@@ -29,6 +29,8 @@
         outputdir (io/file workdir "src")
         mainjs (io/file workdir "main.js")]
 
+    (println "[cljs] Compiling")
+
     ;; Blow away our working dir to ensure we build fresh
     (fileutils/recursive-delete workdir)
 
