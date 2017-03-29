@@ -1,8 +1,9 @@
-(ns lein-nodecljs.core
+(ns leiningen.nodecompile
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
             [clojure.string :as string]
-            [leiningen.core.eval :as eval])
+            [leiningen.core.eval :as eval]
+            [lein-nodecljs.util :as util])
   (:refer-clojure :exclude [compile]))
 
 (defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
@@ -22,34 +23,30 @@
     ;; and blast it out to the filesystem
     (spit path content :truncate true)))
 
-(defn compile [{{main :main} :nodecljs :keys [source-paths target-path] :as project}]
+(defn nodecompile
+  "Compiles a nodecljs project's ClojureScript code into a nodejs module"
+  [{{main :main} :nodecljs :keys [source-paths target-path] :as project}]
 
-  (let [target (io/file target-path)
-        workdir (io/file target "nodecljs")
-        outputdir (io/file workdir "src")
-        mainjs (io/file workdir "main.js")
+  (let [{:keys [workdir outputdir mainjs]} (util/get-config project)
         opts {:main (str main)
               :output-to (.getCanonicalPath mainjs)
               :output-dir (.getCanonicalPath outputdir)
-              :asset-path "src"
+              :asset-path util/outputpath
               :source-map true
               :optimizations :none
               :target :nodejs
               :pretty-print true}]
 
+    (println "[nodecljs] Compiling")
+
     ;; Emit the package.json file
     (emit-packagejson project workdir)
 
-    ;; Emit the javascript code
+    ;; Run the compiler within project-context
     (eval/eval-in-project project
-                          `(do
-                             (println "[cljs] Compiling")
-                             (println "source-paths:" ~@source-paths)
-                             (println "opts:" ~opts)
-
-                             (let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
-                               (println "inputs:" inputs#)
-                               (cljs.build.api/build inputs# ~opts)))
+                          `(let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
+                             ;; Emit the javascript code
+                             (cljs.build.api/build inputs# ~opts))
                           '(require 'cljs.build.api))
 
     ;; Fix up the emitted code to address CLJS-1990 (http://dev.clojure.org/jira/browse/CLJS-1990)
