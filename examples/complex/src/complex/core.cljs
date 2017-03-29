@@ -5,7 +5,6 @@
 (nodejs/enable-util-print!)
 
 (def pb (nodejs/require "protobufjs"))
-(def homedir (nodejs/require "homedir"))
 
 (def builder (.newBuilder pb))
 
