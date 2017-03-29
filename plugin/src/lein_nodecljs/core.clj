@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
             [clojure.string :as string]
-            [cljs.build.api :as build])
+            [leiningen.core.eval :as eval])
   (:refer-clojure :exclude [compile]))
 
 (defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
@@ -27,24 +27,30 @@
   (let [target (io/file target-path)
         workdir (io/file target "nodecljs")
         outputdir (io/file workdir "src")
-        mainjs (io/file workdir "main.js")]
-
-    (println "[cljs] Compiling")
+        mainjs (io/file workdir "main.js")
+        opts {:main (str main)
+              :output-to (.getCanonicalPath mainjs)
+              :output-dir (.getCanonicalPath outputdir)
+              :asset-path "src"
+              :source-map true
+              :optimizations :none
+              :target :nodejs
+              :pretty-print true}]
 
     ;; Emit the package.json file
     (emit-packagejson project workdir)
 
     ;; Emit the javascript code
-    (build/build
-     (apply build/inputs source-paths)
-     {:main main
-      :output-to (.getCanonicalPath mainjs)
-      :output-dir (.getCanonicalPath outputdir)
-      :asset-path "src"
-      :source-map true
-      :optimizations :none
-      :target :nodejs
-      :pretty-print true})
+    (eval/eval-in-project project
+                          `(do
+                             (println "[cljs] Compiling")
+                             (println "source-paths:" ~@source-paths)
+                             (println "opts:" ~opts)
+
+                             (let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
+                               (println "inputs:" inputs#)
+                               (cljs.build.api/build inputs# ~opts)))
+                          '(require 'cljs.build.api))
 
     ;; Fix up the emitted code to address CLJS-1990 (http://dev.clojure.org/jira/browse/CLJS-1990)
     (let [patch (-> (slurp mainjs)
