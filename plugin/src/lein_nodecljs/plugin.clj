@@ -11,6 +11,10 @@
   "Overrides the 'install' task with an 'npm install -g' action"
   [f project & args]
 
+  ;; Delegate to the install function already present
+  (apply f project args)
+
+  ;; and then, run our own installation
   (util/run-compiler project)
 
   (let [{:keys [workdir]} (util/get-config project)]
