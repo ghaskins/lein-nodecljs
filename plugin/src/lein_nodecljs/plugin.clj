@@ -1,5 +1,6 @@
 (ns lein-nodecljs.plugin
-  (:require [lein-nodecljs.util :as util]
+  (:require [leiningen.core.main :as lein.main]
+            [lein-nodecljs.util :as util]
             [lein-nodecljs.exec :refer :all]
             [robert.hooke]
             [leiningen.install]
@@ -13,7 +14,7 @@
   (util/run-compiler project)
 
   (let [{:keys [workdir]} (util/get-config project)]
-    (println "[npm] Installing")
+    (lein.main/info "[npm] Installing")
     (npm "install" "-g" (.getCanonicalPath workdir))))
 
 (defn- run-hook
@@ -24,10 +25,10 @@
 
   (let [{:keys [workdir]} (util/get-config project)]
 
-    (println "[npm] Compiling")
+    (lein.main/info "[npm] Compiling")
     (npm "install" :dir (.getCanonicalPath workdir))
 
-    (println "[node] Launching")
+    (lein.main/info "[node] Launching")
     (node "main.js" :dir (.getCanonicalPath workdir))))
 
 (defn hooks []

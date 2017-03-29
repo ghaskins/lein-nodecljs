@@ -2,6 +2,7 @@
   (:require [clojure.java.io :as io]
             [cheshire.core :as json]
             [clojure.string :as string]
+            [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
             [lein-nodecljs.util :as util])
   (:refer-clojure :exclude [compile]))
@@ -37,7 +38,7 @@
               :target :nodejs
               :pretty-print true}]
 
-    (println "[nodecljs] Compiling")
+    (lein.main/info "[nodecljs] Compiling")
 
     ;; Emit the package.json file
     (emit-packagejson project workdir)

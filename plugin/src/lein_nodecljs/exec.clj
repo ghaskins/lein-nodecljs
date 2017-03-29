@@ -1,13 +1,14 @@
 (ns lein-nodecljs.exec
-  (:require [clojure.java.shell :refer [sh]]))
+  (:require [leiningen.core.main :as lein.main]
+            [clojure.java.shell :refer [sh]]))
 
 (defn- exec [args]
   (let [{:keys [err out exit]} (apply sh args)]
 
-    (println err)
+    (when (not (zero? exit))
+      (lein.main/warn err))
 
-    (when (zero? exit)
-      (println out))
+    (lein.main/debug out)
 
     exit))
 

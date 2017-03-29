@@ -1,5 +1,6 @@
 (ns leiningen.pack
-  (:require [lein-nodecljs.util :as util]
+  (:require [leiningen.core.main :as lein.main]
+            [lein-nodecljs.util :as util]
             [lein-nodecljs.exec :refer :all]))
 
 (defn pack
@@ -11,5 +12,5 @@
 
   ;; Then package everything up with npm-pack
   (let [{:keys [workdir]} (util/get-config project)]
-    (println "[npm] Packaging source")
+    (lein.main/info "[npm] Packaging source")
     (npm "pack" "--verbose" :dir (.getCanonicalPath workdir))))
