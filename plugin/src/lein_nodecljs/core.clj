@@ -5,7 +5,7 @@
             [cljs.build.api :as build])
   (:refer-clojure :exclude [compile]))
 
-(defn- emit-packagejson [{:keys [name description version url npm bin]} workdir]
+(defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
   (let [path (io/file workdir "package.json")
         content (json/generate-string {:name name
                                        :description description
@@ -14,7 +14,7 @@
                                        :dependencies (->> npm
                                                           :dependencies
                                                           (into (sorted-map)))
-                                       :bin {(if bin bin name) "./main.js"}}
+                                       :bin {(or bin name) "./main.js"}}
                                       {:pretty true})]
     ;; ensure the path exists
     (io/make-parents path)
@@ -22,7 +22,7 @@
     ;; and blast it out to the filesystem
     (spit path content :truncate true)))
 
-(defn compile [{:keys [source-paths target-path main] :as project}]
+(defn compile [{{main :main} :nodecljs :keys [source-paths target-path] :as project}]
 
   (let [target (io/file target-path)
         workdir (io/file target "nodecljs")

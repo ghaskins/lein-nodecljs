@@ -7,4 +7,4 @@
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.495"]]
   :npm {:dependencies [[source-map-support "0.4.0"]]}
-  :main hello.core)
+  :nodecljs {:main hello.core})

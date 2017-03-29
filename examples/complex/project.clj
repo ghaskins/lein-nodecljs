@@ -9,4 +9,4 @@
                  [funcool/promesa "1.3.1"]]
   :npm {:dependencies [[source-map-support "0.4.0"]
                        [protobufjs "5.0.1"]]}
-  :main complex.core)
+  :nodecljs {:main complex.core})
