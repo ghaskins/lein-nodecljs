@@ -4,6 +4,7 @@
             [clojure.string :as string]
             [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
+            [lein-nodecljs.exec :refer :all]
             [lein-nodecljs.util :as util])
   (:refer-clojure :exclude [compile]))
 
@@ -38,12 +39,14 @@
               :target :nodejs
               :pretty-print true}]
 
-    (lein.main/info "[nodecljs] Compiling")
-
     ;; Emit the package.json file
     (emit-packagejson project workdir)
 
+    (lein.main/info "[npm] Installing Dependencies")
+    (npm "install" :dir (.getCanonicalPath workdir))
+
     ;; Run the compiler within project-context
+    (lein.main/info "[nodecljs] Compiling")
     (eval/eval-in-project project
                           `(let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
                              ;; Emit the javascript code

@@ -29,9 +29,6 @@
 
   (let [{:keys [workdir]} (util/get-config project)]
 
-    (lein.main/info "[npm] Compiling")
-    (npm "install" :dir (.getCanonicalPath workdir))
-
     (lein.main/info "[node] Launching")
     (node "main.js" :dir (.getCanonicalPath workdir))))
 

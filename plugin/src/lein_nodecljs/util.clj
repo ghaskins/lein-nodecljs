@@ -14,3 +14,4 @@
 
 (defn run-compiler [project]
   (leiningen.core.main/apply-task "nodecompile" project []))
+
