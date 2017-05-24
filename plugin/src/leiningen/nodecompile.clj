@@ -5,20 +5,22 @@
             [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
             [lein-nodecljs.exec :refer :all]
-            [lein-nodecljs.util :as util])
+            [lein-nodecljs.util :as util]
+            [me.raynes.fs :refer :all])
   (:refer-clojure :exclude [compile]))
 
 (defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
   (let [path (io/file workdir "package.json")
-        content (json/generate-string {:name name
-                                       :description description
-                                       :version version
-                                       :homepage url
-                                       :dependencies (->> npm
-                                                          :dependencies
-                                                          (into (sorted-map)))
-                                       :bin {(or bin name) "./main.js"}}
-                                      {:pretty true})]
+        json {:name name
+              :description description
+              :version version
+              :homepage url
+              :dependencies (->> npm
+                                 :dependencies
+                                 (into (sorted-map)))
+              :bin {(or bin name) "./main.js"}}
+        content (json/generate-string json {:pretty true})]
+
     ;; ensure the path exists
     (io/make-parents path)
 
@@ -27,7 +29,7 @@
 
 (defn nodecompile
   "Compiles a nodecljs project's ClojureScript code into a nodejs module"
-  [{{main :main} :nodecljs :keys [source-paths target-path] :as project}]
+  [{{main :main files :files} :nodecljs :keys [source-paths target-path] :as project}]
 
   (let [{:keys [workdir outputdir mainjs]} (util/get-config project)
         opts {:main (str main)
@@ -41,6 +43,15 @@
 
     ;; Emit the package.json file
     (emit-packagejson project workdir)
+
+    ;; Copy resources
+    (when-let [inputs (->> files (map io/file) (map file-seq) flatten (filter file?))]
+      (lein.main/info "[nodecljs] Copying resources")
+      (doseq [input inputs]
+        (let [ipath (.getPath input)
+              output (io/file workdir ipath)]
+          (io/make-parents output)
+          (io/copy input output))))
 
     (lein.main/info "[npm] Installing Dependencies")
     (npm "install" :dir (.getCanonicalPath workdir))
