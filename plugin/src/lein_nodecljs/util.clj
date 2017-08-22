@@ -12,6 +12,8 @@
 
       {:workdir workdir :outputdir outputdir :mainjs mainjs}))
 
+(defn get-deps [project]
+  (leiningen.core.main/apply-task "nodedeps" project []))
+
 (defn run-compiler [project]
   (leiningen.core.main/apply-task "nodecompile" project []))
-

@@ -1,6 +1,5 @@
 (ns leiningen.nodecompile
   (:require [clojure.java.io :as io]
-            [cheshire.core :as json]
             [clojure.string :as string]
             [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
@@ -9,27 +8,9 @@
             [me.raynes.fs :refer :all])
   (:refer-clojure :exclude [compile]))
 
-(defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
-  (let [path (io/file workdir "package.json")
-        json {:name name
-              :description description
-              :version version
-              :homepage url
-              :dependencies (->> npm
-                                 :dependencies
-                                 (into (sorted-map)))
-              :bin {(or bin name) "./main.js"}}
-        content (json/generate-string json {:pretty true})]
-
-    ;; ensure the path exists
-    (io/make-parents path)
-
-    ;; and blast it out to the filesystem
-    (spit path content :truncate true)))
-
 (defn nodecompile
   "Compiles a nodecljs project's ClojureScript code into a nodejs module"
-  [{{main :main files :files} :nodecljs :keys [source-paths target-path] :as project}]
+  [{{main :main files :files} :nodecljs :keys [source-paths] :as project}]
 
   (let [{:keys [workdir outputdir mainjs]} (util/get-config project)
         opts {:main (str main)
@@ -41,8 +22,8 @@
               :target :nodejs
               :pretty-print true}]
 
-    ;; Emit the package.json file
-    (emit-packagejson project workdir)
+    ;; ensure we download our deps first
+    (util/get-deps project)
 
     ;; Copy resources
     (when-let [inputs (->> files (map io/file) (map file-seq) flatten (filter file?))]
@@ -52,9 +33,6 @@
               output (io/file workdir ipath)]
           (io/make-parents output)
           (io/copy input output))))
-
-    (lein.main/info "[npm] Installing Dependencies")
-    (npm "install" :dir (.getCanonicalPath workdir))
 
     ;; Run the compiler within project-context
     (lein.main/info "[nodecljs] Compiling")
