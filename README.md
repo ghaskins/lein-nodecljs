@@ -22,9 +22,10 @@ installation or publishing to npmjs.org.
 
 Put `lein-nodecljs` into the `:plugins` vector of your project.clj.
 
-* `lein compile` - Override that compiles your program to :target/nodecljs.
+* `lein nodedeps` - New task that downloads NPM dependencies to :target/nodecljs.
+* `lein nodecompile` - New task that compiles your program to :target/nodecljs.  'nodedeps' is implicitly invoked.
 * `lein run` - Override that compiles and then executes your program on the nodejs platform in place.
-* `lein install` - Override that compiles and then installs your program with 'npm install -g'.
+* `lein install` - Override that nodecompiles and then installs your program with 'npm install -g'.
 * `lein pack` - New task that packages your code with 'npm pack' suitable for manual installation or deployment to npmjs.org. 
 
 ## License
