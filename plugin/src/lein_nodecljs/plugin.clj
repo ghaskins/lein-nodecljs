@@ -25,6 +25,7 @@
   "Overrides the 'run' task to execute our program on nodejs platform"
   [f project & args]
 
+  (util/get-deps project)
   (util/run-compiler project)
 
   (let [{:keys [workdir]} (util/get-config project)]

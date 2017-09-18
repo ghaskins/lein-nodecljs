@@ -4,13 +4,14 @@
 
 (def outputpath "src")
 
-(defn get-config [{:keys [target-path] :as project}]
-    (let [target (io/file target-path)
-          workdir (io/file target "nodecljs")
-          outputdir (io/file workdir outputpath)
-          mainjs (io/file workdir "main.js")]
+(defn get-config [{{:keys [path]} :nodecljs :keys [target-path] :as project}]
+  (let [workdir (if path
+                  (io/file path)
+                  (io/file target-path "nodecljs"))
+        outputdir (io/file workdir outputpath)
+        mainjs (io/file workdir "main.js")]
 
-      {:workdir workdir :outputdir outputdir :mainjs mainjs}))
+    {:workdir workdir :outputdir outputdir :mainjs mainjs}))
 
 (defn get-deps [project]
   (leiningen.core.main/apply-task "nodedeps" project []))

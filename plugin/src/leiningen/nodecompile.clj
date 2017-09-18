@@ -1,5 +1,6 @@
 (ns leiningen.nodecompile
-  (:require [clojure.java.io :as io]
+  (:require [lein-nodecljs.package :as package]
+            [clojure.java.io :as io]
             [clojure.string :as string]
             [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
@@ -22,8 +23,7 @@
               :target :nodejs
               :pretty-print true}]
 
-    ;; ensure we download our deps first
-    (util/get-deps project)
+    (package/emit-json project workdir)
 
     ;; Copy resources
     (when-let [inputs (->> files (map io/file) (map file-seq) flatten (filter file?))]

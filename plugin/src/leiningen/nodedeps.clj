@@ -1,30 +1,11 @@
 (ns leiningen.nodedeps
-  (:require [clojure.java.io :as io]
+  (:require [lein-nodecljs.package :as package]
             [clojure.string :as string]
-            [cheshire.core :as json]
             [clojure.tools.cli :refer [parse-opts]]
             [leiningen.core.main :as lein.main]
             [lein-nodecljs.exec :refer :all]
             [lein-nodecljs.util :as util])
   (:refer-clojure :exclude [compile]))
-
-(defn- emit-packagejson [{{bin :bin} :nodecljs :keys [name description version url npm]} workdir]
-  (let [path (io/file workdir "package.json")
-        json {:name name
-              :description description
-              :version version
-              :homepage url
-              :dependencies (->> npm
-                                 :dependencies
-                                 (into (sorted-map)))
-              :bin {(or bin name) "./main.js"}}
-        content (json/generate-string json {:pretty true})]
-
-    ;; ensure the path exists
-    (io/make-parents path)
-
-    ;; and blast it out to the filesystem
-    (spit path content :truncate true)))
 
 (def cli-options
   [["-g" "--global" "install npm dependencies globally"]])
@@ -56,7 +37,7 @@
       :else
       (do
         ;; Emit the package.json file
-        (emit-packagejson project workdir)
+        (package/emit-json project workdir)
 
         (if (:global options)
           (do
