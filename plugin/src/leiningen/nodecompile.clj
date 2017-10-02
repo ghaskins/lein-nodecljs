@@ -12,8 +12,9 @@
 
 (def cli-options
   [["-d" "--debug" "generate a debug build"]
-   ["-p" "--parallel BOOL" "run the compiler with parallel execution"
-    :default true]])
+   [nil "--disable-parallel" "run the compiler without parallel execution"]
+   ["-p" "--profile PROFILE" "select the cljsbuild profile"
+    :default "nodecljs"]])
 
 (defn prep-usage [msg] (->> msg flatten (string/join \newline)))
 
@@ -24,21 +25,30 @@
                options-summary
                ""]))
 
+(defn normalize-profiles [profiles]
+  (cond
+
+    (map? profiles)
+    profiles
+
+    :else
+    (->> profiles (map (fn [e] [(:id e) e])) (into {}))))
+
+
 (defn nodecompile
   "Compiles a nodecljs project's ClojureScript code into a nodejs module"
   [{{main :main files :files} :nodecljs :keys [source-paths] :as project} & args]
 
-  (let [{{:keys [debug parallel]} :options :keys [summary errors]} (parse-opts args cli-options)
+  (let [{{:keys [debug disable-parallel profile]} :options :keys [summary errors]} (parse-opts args cli-options)
         {:keys [workdir outputdir mainjs]} (util/get-config project)
-        opts (-> {:main (str main)
-                  :output-to (.getCanonicalPath mainjs)
-                  :output-dir (.getCanonicalPath outputdir)
-                  :asset-path util/outputpath
-                  :source-map true
-                  :optimizations :none
-                  :target :nodejs
-                  :pretty-print true
-                  :parallel-build parallel}
+        build-profile (-> project
+                          :cljsbuild
+                          :builds
+                          normalize-profiles
+                          (get profile))
+        opts (-> (:compiler build-profile)
+                 (cond-> (not disable-parallel)
+                   (assoc :parallel-build true))
                  (cond-> (not debug)
                    (assoc :static-fns true
                           :fn-invoke-direct true
