@@ -2,6 +2,7 @@
   (:require [lein-nodecljs.package :as package]
             [clojure.java.io :as io]
             [clojure.string :as string]
+            [clojure.tools.cli :refer [parse-opts]]
             [leiningen.core.main :as lein.main]
             [leiningen.core.eval :as eval]
             [lein-nodecljs.exec :refer :all]
@@ -9,19 +10,39 @@
             [me.raynes.fs :refer :all])
   (:refer-clojure :exclude [compile]))
 
+(def cli-options
+  [["-d" "--debug" "generate a debug build"]
+   ["-p" "--parallel BOOL" "run the compiler with parallel execution"
+    :default true]])
+
+(defn prep-usage [msg] (->> msg flatten (string/join \newline)))
+
+(defn usage [options-summary]
+  (prep-usage ["Usage: lein nodecompile [options]"
+               ""
+               "Options Summary:"
+               options-summary
+               ""]))
+
 (defn nodecompile
   "Compiles a nodecljs project's ClojureScript code into a nodejs module"
-  [{{main :main files :files} :nodecljs :keys [source-paths] :as project}]
+  [{{main :main files :files} :nodecljs :keys [source-paths] :as project} & args]
 
-  (let [{:keys [workdir outputdir mainjs]} (util/get-config project)
-        opts {:main (str main)
-              :output-to (.getCanonicalPath mainjs)
-              :output-dir (.getCanonicalPath outputdir)
-              :asset-path util/outputpath
-              :source-map true
-              :optimizations :none
-              :target :nodejs
-              :pretty-print true}]
+  (let [{{:keys [debug parallel]} :options :keys [summary errors]} (parse-opts args cli-options)
+        {:keys [workdir outputdir mainjs]} (util/get-config project)
+        opts (-> {:main (str main)
+                  :output-to (.getCanonicalPath mainjs)
+                  :output-dir (.getCanonicalPath outputdir)
+                  :asset-path util/outputpath
+                  :source-map true
+                  :optimizations :none
+                  :target :nodejs
+                  :pretty-print true
+                  :parallel-build parallel}
+                 (cond-> (not debug)
+                   (assoc :static-fns true
+                          :fn-invoke-direct true
+                          :optimize-constants true)))]
 
     (package/emit-json project workdir)
 
@@ -35,7 +56,7 @@
           (io/copy input output))))
 
     ;; Run the compiler within project-context
-    (lein.main/info "[nodecljs] Compiling")
+    (lein.main/info (str "[nodecljs] Compiling using " opts))
     (eval/eval-in-project project
                           `(let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
                              ;; Emit the javascript code
