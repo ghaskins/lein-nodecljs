@@ -41,18 +41,19 @@
 
   (let [{{:keys [debug disable-parallel profile]} :options :keys [summary errors]} (parse-opts args cli-options)
         {:keys [workdir outputdir mainjs]} (util/get-config project)
-        build-profile (-> project
+        build-profiles (-> project
                           :cljsbuild
                           :builds
-                          normalize-profiles
-                          (get profile))
-        opts (-> (:compiler build-profile)
-                 (cond-> (not disable-parallel)
-                   (assoc :parallel-build true))
-                 (cond-> (not debug)
-                   (assoc :static-fns true
-                          :fn-invoke-direct true
-                          :optimize-constants true)))]
+                          normalize-profiles)
+        compiler-opts (-> (get-in build-profiles [profile :compiler])
+                          (cond-> (not disable-parallel)
+                            (assoc :parallel-build true))
+                          (cond-> (not debug)
+                            (assoc :static-fns true
+                                   :fn-invoke-direct true
+                                   :optimize-constants true)))
+        updated-project (->> (assoc-in build-profiles [profile :compiler] compiler-opts)
+                             (assoc-in project [:cljsbuild :builds]))]
 
     (package/emit-json project workdir)
 
@@ -65,13 +66,8 @@
           (io/make-parents output)
           (io/copy input output))))
 
-    ;; Run the compiler within project-context
-    (lein.main/info (str "[nodecljs] Compiling using " opts))
-    (eval/eval-in-project project
-                          `(let [inputs# (apply cljs.build.api/inputs [~@source-paths])]
-                             ;; Emit the javascript code
-                             (cljs.build.api/build inputs# ~opts))
-                          '(require 'cljs.build.api))
+    ;; Run the compiler
+    (lein.main/apply-task "cljsbuild" updated-project ["once" profile])
 
     ;; Fix up the emitted code to address CLJS-1990 (http://dev.clojure.org/jira/browse/CLJS-1990)
     (let [patch (-> (slurp mainjs)
