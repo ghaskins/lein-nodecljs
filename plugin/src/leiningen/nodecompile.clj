@@ -40,20 +40,20 @@
   [{{main :main files :files} :nodecljs :keys [source-paths] :as project} & args]
 
   (let [{{:keys [debug disable-parallel profile]} :options :keys [summary errors]} (parse-opts args cli-options)
-        {:keys [workdir outputdir mainjs]} (util/get-config project)
-        build-profiles (-> project
-                          :cljsbuild
-                          :builds
-                          normalize-profiles)
-        compiler-opts (-> (get-in build-profiles [profile :compiler])
-                          (cond-> (not disable-parallel)
-                            (assoc :parallel-build true))
-                          (cond-> (not debug)
-                            (assoc :static-fns true
-                                   :fn-invoke-direct true
-                                   :optimize-constants true)))
-        updated-project (->> (assoc-in build-profiles [profile :compiler] compiler-opts)
-                             (assoc-in project [:cljsbuild :builds]))]
+        {:keys [workdir mainjs]} (util/get-config project)
+        updated-project (-> project
+                            (update-in [:cljsbuild :builds] normalize-profiles)
+                            (update-in [:cljsbuild :builds profile]
+                                       (fn [p]
+                                         (-> (update p :compiler
+                                                     (fn [compiler]
+                                                       (-> compiler
+                                                           (cond-> (not disable-parallel)
+                                                             (assoc :parallel-build true))
+                                                           (cond-> (not debug)
+                                                             (assoc :static-fns true
+                                                                    :fn-invoke-direct true
+                                                                    :optimize-constants true)))))))))]
 
     (package/emit-json project workdir)
 

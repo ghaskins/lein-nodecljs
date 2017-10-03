@@ -49,8 +49,10 @@
           plugins (->> project :plugins (map first) (into #{}))
           deps (->> project :npm :dependencies (map first) (into #{}))
           builds (->> project :cljsbuild :builds)
-          nodecljs-build {:id "nodecljs"
+          nodecljs-build {
+                          :id "nodecljs"
                           :source-paths source-paths
+                          :figwheel true
                           :compiler {
                                      :main (str main)
                                      :asset-path util/outputpath
