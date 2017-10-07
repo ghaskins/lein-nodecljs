@@ -1,4 +1,4 @@
-(defproject lein-nodecljs "0.12.0-SNAPSHOT"
+(defproject lein-nodecljs "0.11.1"
   :description "A plugin for Leiningen to assist with building Clojurescript apps for NodeJS"
   :url "http://github.com/ghaskins/lein-nodecljs"
   :license {:name "Eclipse Public License"
