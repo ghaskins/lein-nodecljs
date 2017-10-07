@@ -61,7 +61,7 @@
                                      :target :nodejs
                                      :optimizations :none
                                      :pretty-print true
-                                     :source-map-timestamp true}}
+                                     :source-map true}}
 
           autoprofile (-> {:nodecljs {:autoprofile true}}
 
